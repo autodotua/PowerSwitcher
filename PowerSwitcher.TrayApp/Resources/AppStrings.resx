@@ -118,22 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="About" xml:space="preserve">
-    <value>About</value>
+    <value>关于</value>
   </data>
   <data name="AboutAppURL" xml:space="preserve">
     <value>http://github.com/Petrroll/PowerSwitcher</value>
   </data>
   <data name="AppName" xml:space="preserve">
-    <value>PowerPlanSwitcher</value>
+    <value>电源模式切换</value>
   </data>
   <data name="AutomaticOnOffACSwitch" xml:space="preserve">
-    <value>Automaticly change schema when on AC</value>
+    <value>电源状态改变时自动切换</value>
   </data>
   <data name="Exit" xml:space="preserve">
-    <value>Exit</value>
+    <value>退出</value>
   </data>
   <data name="HideFlyoutAfterSchemaChangeSwitch" xml:space="preserve">
-    <value>Hide flyout after schema change</value>
+    <value>切换后自动关闭面板</value>
   </data>
   <data name="IconLicence" xml:space="preserve">
     <value>Icon made by Cursor creative</value>
@@ -142,18 +142,21 @@
     <value>http://www.flaticon.com/authors/cursor-creative</value>
   </data>
   <data name="SchemaToSwitchOffAc" xml:space="preserve">
-    <value>Schema to switch to off AC</value>
+    <value>拔出电源时切换到</value>
   </data>
   <data name="SchemaToSwitchOnAc" xml:space="preserve">
-    <value>Schema to switch to on AC</value>
+    <value>插上电源时切换到</value>
   </data>
   <data name="Settings" xml:space="preserve">
-    <value>Settings</value>
+    <value>设置</value>
   </data>
   <data name="ShowOnlyDefaultSchemas" xml:space="preserve">
-    <value>Show only default power schemas</value>
+    <value>仅显示默认电源模式</value>
+  </data>
+  <data name="Startup" xml:space="preserve">
+    <value>开机自启</value>
   </data>
   <data name="ToggleOnShowrtcutSwitch" xml:space="preserve">
-    <value>Enable shortcut for flyout toggle</value>
+    <value>快捷键呼出面板</value>
   </data>
 </root>

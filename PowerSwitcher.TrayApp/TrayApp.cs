@@ -1,6 +1,6 @@
-﻿using Petrroll.Helpers;
-using PowerSwitcher.TrayApp.Configuration;
-using PowerSwitcher.TrayApp.Resources;
+﻿using PowerSwitcher.Configuration;
+using PowerSwitcher.Helper;
+using PowerSwitcher.Resources;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -8,15 +8,14 @@ using System.Reflection;
 using System.Windows;
 using WF = System.Windows.Forms;
 
-
-namespace PowerSwitcher.TrayApp
+namespace PowerSwitcher
 {
 
     public class TrayApp
     {
 
         #region PrivateObjects
-        readonly WF.NotifyIcon _trayIcon;
+        readonly WF.NotifyIcon trayIcon;
         public event Action ShowFlyout;
         IPowerManager pwrManager;
         ConfigurationInstance<PowerSwitcherSettings> configuration;
@@ -30,25 +29,41 @@ namespace PowerSwitcher.TrayApp
 
             configuration = config;
 
-            _trayIcon = new WF.NotifyIcon();
-            _trayIcon.MouseClick += TrayIcon_MouseClick;
+            trayIcon = new WF.NotifyIcon();
+            trayIcon.MouseClick += TrayIcon_MouseClick;
 
-            _trayIcon.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/PowerSwitcher.TrayApp;component/Tray.ico")).Stream, WF.SystemInformation.SmallIconSize);
-            _trayIcon.Text = string.Concat(AppStrings.AppName);
-            _trayIcon.Visible = true;
+            trayIcon.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/PowerSwitcher;component/Tray.ico")).Stream, WF.SystemInformation.SmallIconSize);
+            trayIcon.Text = string.Concat(AppStrings.AppName);
+
+            trayIcon.Visible = true;
 
             this.ShowFlyout += (((App)Application.Current).MainWindow as MainWindow).ToggleWindowVisibility;
 
             //Run automatic on-off-AC change at boot
             powerStatusChanged();
+
+
+            if (Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.IsBatteryPresent)
+            {
+                BatteryLifePercentChanged(null, null);
+                Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.BatteryLifePercentChanged += BatteryLifePercentChanged;
+            }
+        }
+
+        private void BatteryLifePercentChanged(object sender, EventArgs e)
+        {
+            if (Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.IsBatteryPresent)
+            {
+                trayIcon.Text = Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.BatteryLifePercent + "%";
+            }
         }
 
         public void CreateAltMenu()
         {
             var contextMenuRoot = new WF.ContextMenu();
-            contextMenuRoot.Popup += ContextMenu_Popup;
+            contextMenuRoot.Popup += ContextMenuPopup;
 
-            _trayIcon.ContextMenu = contextMenuRoot;
+            trayIcon.ContextMenu = contextMenuRoot;
 
             var contextMenuRootItems = contextMenuRoot.MenuItems;
             contextMenuRootItems.Add("-");
@@ -79,11 +94,29 @@ namespace PowerSwitcher.TrayApp
             enableShortcutsToggleItem.Checked = configuration.Data.ShowOnShortcutSwitch;
             enableShortcutsToggleItem.Click += EnableShortcutsToggleItem_Click;
 
+            var startupItem = contextMenuSettings.MenuItems.Add($"{AppStrings.Startup}");
+            startupItem.Checked = Startup.IsRegistryKeyExist();
+            startupItem.Click += StartupItemClick;
+
             var aboutItem = contextMenuRootItems.Add($"{AppStrings.About} ({Assembly.GetEntryAssembly().GetName().Version})");
             aboutItem.Click += About_Click;
 
             var exitItem = contextMenuRootItems.Add(AppStrings.Exit);
             exitItem.Click += Exit_Click;
+        }
+
+        private void StartupItemClick(object sender, EventArgs e)
+        {
+            if (Startup.IsRegistryKeyExist())
+            {
+                (sender as WF.MenuItem).Checked = false;
+                Startup.DeleteRegistryKey();
+            }
+            else
+            {
+                (sender as WF.MenuItem).Checked = true;
+                Startup.CreateRegistryKey();
+            }
         }
 
         #endregion
@@ -154,7 +187,7 @@ namespace PowerSwitcher.TrayApp
 
         private void powerStatusChanged()
         {
-            if(!configuration.Data.AutomaticOnACSwitch) { return; }
+            if (!configuration.Data.AutomaticOnACSwitch) { return; }
 
             var currentPowerPlugStatus = pwrManager.CurrentPowerStatus;
             Guid schemaGuidToSwitch = default(Guid);
@@ -172,7 +205,7 @@ namespace PowerSwitcher.TrayApp
             }
 
             IPowerSchema schemaToSwitchTo = pwrManager.Schemas.FirstOrDefault(sch => sch.Guid == schemaGuidToSwitch);
-            if(schemaToSwitchTo == null) { return; }
+            if (schemaToSwitchTo == null) { return; }
 
             pwrManager.SetPowerSchema(schemaToSwitchTo);
         }
@@ -181,7 +214,7 @@ namespace PowerSwitcher.TrayApp
 
         #region ContextMenuItemRelatedStuff
 
-        private void ContextMenu_Popup(object sender, EventArgs e)
+        private void ContextMenuPopup(object sender, EventArgs e)
         {
             clearPowerSchemasInTray();
 
@@ -199,14 +232,14 @@ namespace PowerSwitcher.TrayApp
                 (s, ea) => switchToPowerSchema(powerSchema),
                 powerSchema.IsActive
                 );
-            _trayIcon.ContextMenu.MenuItems.Add(0, newItemMain);
+            trayIcon.ContextMenu.MenuItems.Add(0, newItemMain);
 
             var newItemSettingsOffAC = getNewPowerSchemaItem(
                 powerSchema,
                 (s, ea) => setPowerSchemaAsOffAC(powerSchema),
                 (powerSchema.Guid == configuration.Data.AutomaticPlanGuidOffAC)
                 );
-            _trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOffAC"].MenuItems.Add(0, newItemSettingsOffAC);
+            trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOffAC"].MenuItems.Add(0, newItemSettingsOffAC);
 
             var newItemSettingsOnAC = getNewPowerSchemaItem(
                 powerSchema,
@@ -214,22 +247,22 @@ namespace PowerSwitcher.TrayApp
                 (powerSchema.Guid == configuration.Data.AutomaticPlanGuidOnAC)
                 );
 
-            _trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOnAC"].MenuItems.Add(0, newItemSettingsOnAC);
+            trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOnAC"].MenuItems.Add(0, newItemSettingsOnAC);
         }
 
         private void clearPowerSchemasInTray()
         {
-            for (int i = _trayIcon.ContextMenu.MenuItems.Count - 1; i >= 0; i--)
+            for (int i = trayIcon.ContextMenu.MenuItems.Count - 1; i >= 0; i--)
             {
-                var item = _trayIcon.ContextMenu.MenuItems[i];
+                var item = trayIcon.ContextMenu.MenuItems[i];
                 if (item.Name.StartsWith("pwrScheme", StringComparison.Ordinal))
                 {
-                    _trayIcon.ContextMenu.MenuItems.Remove(item);
+                    trayIcon.ContextMenu.MenuItems.Remove(item);
                 }
             }
 
-            _trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOffAC"].MenuItems.Clear();
-            _trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOnAC"].MenuItems.Clear();
+            trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOffAC"].MenuItems.Clear();
+            trayIcon.ContextMenu.MenuItems["settings"].MenuItems["settingsOnAC"].MenuItems.Clear();
         }
 
         private WF.MenuItem getNewPowerSchemaItem(IPowerSchema powerSchema, EventHandler clickedHandler, bool isChecked)
@@ -278,8 +311,8 @@ namespace PowerSwitcher.TrayApp
 
         void Exit_Click(object sender, EventArgs e)
         {
-            _trayIcon.Visible = false;
-            _trayIcon.Dispose();
+            trayIcon.Visible = false;
+            trayIcon.Dispose();
 
             pwrManager.Dispose();
 

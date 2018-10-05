@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace PowerSwitcher.TrayApp.Extensions
+namespace PowerSwitcher.Extensions
 {
     [ValueConversion(typeof(bool), typeof(Visibility))]
     public class InvertableVisibilityConverter : IValueConverter

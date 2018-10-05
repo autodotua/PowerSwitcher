@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Petrroll.Helpers
+namespace PowerSwitcher.Helper
 {
     public class ObservableObject : INotifyPropertyChanged
     {

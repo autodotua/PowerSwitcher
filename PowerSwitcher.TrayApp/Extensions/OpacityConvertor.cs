@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace PowerSwitcher.TrayApp.Extensions
+namespace PowerSwitcher.Extensions
 {
     public class OpacityConverter : IValueConverter
     {

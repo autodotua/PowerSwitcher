@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Petrroll.Helpers
+namespace PowerSwitcher.Helper
 {
-    public static class LINQHelpers
+    public static class LinqHelpers
     {
         public static int IndexOf(this IEnumerable enumeration, object obj)
         {

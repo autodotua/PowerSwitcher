@@ -1,11 +1,11 @@
-﻿using Petrroll.Helpers;
-using PowerSwitcher.TrayApp.Configuration;
+﻿using PowerSwitcher.Helper;
+using PowerSwitcher.Configuration;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 
-namespace PowerSwitcher.TrayApp.ViewModels
+namespace PowerSwitcher.ViewModels
 {
     public class MainWindowViewModel : ObservableObject
     {
@@ -18,6 +18,7 @@ namespace PowerSwitcher.TrayApp.ViewModels
             get { return pwrManager.CurrentSchema; }
             set { if (value != null && !value.IsActive) { pwrManager.SetPowerSchema(value); } }
         }
+        public string BatteryLavel { get; set; }
 
         public MainWindowViewModel()
         {
@@ -53,7 +54,10 @@ namespace PowerSwitcher.TrayApp.ViewModels
 
         private void PwrManager_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IPowerManager.CurrentSchema)) { RaisePropertyChangedEvent(nameof(ActiveSchema)); }
+            if (e.PropertyName == nameof(IPowerManager.CurrentSchema))
+            {
+                RaisePropertyChangedEvent(nameof(ActiveSchema));
+            }
         }
 
         private Guid[] defaultGuids = { new Guid("8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"), new Guid("381b4222-f694-41f0-9685-ff5bb260df2e"), new Guid("a1841308-3541-4fab-bc81-f71556f20b4a") };
@@ -66,6 +70,54 @@ namespace PowerSwitcher.TrayApp.ViewModels
         public void Refresh()
         {
             pwrManager.UpdateSchemas();
+            UpdateBatteryInfo();
+        }
+
+        private void UpdateBatteryInfo()
+        {
+            var status = Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.GetCurrentBatteryState();
+            if (Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.IsBatteryPresent)
+            {
+                BatteryLavel = Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.BatteryLifePercent.ToString() + "%";
+
+                try
+                {
+                    if (status.ChargeRate != 0)
+                    {
+                        BatteryLavel += "    " + (status.ChargeRate > 0 ? "+" : "")
+                            + (status.ChargeRate / 1000.0).ToString("0.0") + "W";
+                    }
+
+                    if (status.MaxCharge > 0)
+                    {
+                        BatteryLavel += "    " + (status.CurrentCharge / 1000.0).ToString("0") + "Wh" + " / " + (status.MaxCharge / 1000.0).ToString("0") + "Wh";
+                    }
+
+                    if (status.EstimatedTimeRemaining != TimeSpan.MinValue
+                        && status.EstimatedTimeRemaining != TimeSpan.Zero
+                        && status.EstimatedTimeRemaining.TotalHours < 1000)
+                    {
+                        BatteryLavel += "    " + status.EstimatedTimeRemaining.Hours.ToString()
+                          + ":" + status.EstimatedTimeRemaining.Minutes.ToString("00");
+                    }
+
+                    if (status.ACOnline)
+                    {
+                        BatteryLavel += "    🔌";
+                    }
+                }
+                catch
+                {
+
+                }
+
+
+            }
+            else
+            {
+                BatteryLavel = "外接电源";
+            }
+            RaisePropertyChangedEvent(nameof(BatteryLavel));
         }
     }
 }

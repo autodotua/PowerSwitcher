@@ -1,9 +1,9 @@
-﻿using Petrroll.Helpers;
-using PowerSwitcher.TrayApp.Services;
+﻿using PowerSwitcher.Helper;
+using PowerSwitcher.Services;
 using System;
 using System.Windows.Input;
 
-namespace PowerSwitcher.TrayApp.Configuration
+namespace PowerSwitcher.Configuration
 {
     [Serializable]
     public class PowerSwitcherSettings : ObservableObject

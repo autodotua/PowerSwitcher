@@ -1,10 +1,10 @@
-﻿using PowerSwitcher.TrayApp.Services;
+﻿using PowerSwitcher.Services;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace PowerSwitcher.TrayApp.Extensions
+namespace PowerSwitcher.Extensions
 {
     ////
     //  Code heavily inspired by https://github.com/File-New-Project/EarTrumpet/blob/master/EarTrumpet/Extensions/BlurWindowExtensions.cs

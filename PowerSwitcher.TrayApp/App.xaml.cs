@@ -1,6 +1,6 @@
-﻿using Petrroll.Helpers;
-using PowerSwitcher.TrayApp.Configuration;
-using PowerSwitcher.TrayApp.Services;
+﻿using PowerSwitcher.Helper;
+using PowerSwitcher.Configuration;
+using PowerSwitcher.Services;
 using System;
 using System.Globalization;
 using System.IO;
@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows;
 
-namespace PowerSwitcher.TrayApp
+namespace PowerSwitcher
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -22,13 +22,16 @@ namespace PowerSwitcher.TrayApp
         public TrayApp TrayApp { get; private set; }
         public ConfigurationInstance<PowerSwitcherSettings> Configuration { get; private set; }
 
-        private Mutex _mMutex;
-        private void Application_Startup(object sender, StartupEventArgs e)
+        private Mutex mMutex;
+        private void ApplicationStartup(object sender, StartupEventArgs e)
         {
-            if (!tryToCreateMutex()) return;
+            if (!TryToCreateMutex())
+            {
+                return;
+            }
 
             var configurationManager = new ConfigurationManagerXML<PowerSwitcherSettings>(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), 
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Petrroll", "PowerSwitcher", "PowerSwitcherSettings.xml"
                 ));
 
@@ -42,7 +45,7 @@ namespace PowerSwitcher.TrayApp
             MainWindow = new MainWindow();
             TrayApp = new TrayApp(PowerManager, Configuration); //Has to be last because it hooks to MainWindow
 
-            Configuration.Data.PropertyChanged += Configuration_PropertyChanged;
+            Configuration.Data.PropertyChanged += ConfigurationPropertyChanged;
             if (Configuration.Data.ShowOnShortcutSwitch) { registerHotkeyFromConfiguration(); }
 
             TrayApp.CreateAltMenu();
@@ -51,7 +54,7 @@ namespace PowerSwitcher.TrayApp
         private void migrateSettings()
         {
             //Migration of shortcut because Creators update uses WinShift + S for screenshots
-            if(Configuration.Data.ShowOnShortcutKey == System.Windows.Input.Key.S &&
+            if (Configuration.Data.ShowOnShortcutKey == System.Windows.Input.Key.S &&
                 Configuration.Data.ShowOnShortcutKeyModifier == (KeyModifier.Shift | KeyModifier.Win))
             {
                 Configuration.Data.ShowOnShortcutKey = System.Windows.Input.Key.L;
@@ -59,9 +62,9 @@ namespace PowerSwitcher.TrayApp
             }
         }
 
-        private void Configuration_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ConfigurationPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if(e.PropertyName == nameof(PowerSwitcherSettings.ShowOnShortcutSwitch))
+            if (e.PropertyName == nameof(PowerSwitcherSettings.ShowOnShortcutSwitch))
             {
                 if (Configuration.Data.ShowOnShortcutSwitch) { registerHotkeyFromConfiguration(); }
                 else { unregisterHotkeyFromConfiguration(); }
@@ -78,36 +81,36 @@ namespace PowerSwitcher.TrayApp
             var newHotKey = new HotKey(Configuration.Data.ShowOnShortcutKey, Configuration.Data.ShowOnShortcutKeyModifier);
 
             bool success = HotKeyManager.Register(newHotKey);
-            if(!success) { HotKeyFailed = true; return false; }
+            if (!success) { HotKeyFailed = true; return false; }
             newHotKey.HotKeyFired += (this.MainWindow as MainWindow).ToggleWindowVisibility;
 
             return true;
         }
 
-        private bool tryToCreateMutex()
+        private bool TryToCreateMutex()
         {
             var assembly = Assembly.GetExecutingAssembly();
             var mutexName = string.Format(CultureInfo.InvariantCulture, "Local\\{{{0}}}{{{1}}}", assembly.GetType().GUID, assembly.GetName().Name);
 
             bool mutexCreated;
 
-            _mMutex = new Mutex(true, mutexName, out mutexCreated);
+            mMutex = new Mutex(true, mutexName, out mutexCreated);
             if (mutexCreated) { return true; }
 
-            _mMutex = null;
+            mMutex = null;
             Current.Shutdown();
             return false;
         }
 
         private void DisposeMutex()
         {
-            if (_mMutex == null) return;
-            _mMutex.ReleaseMutex();
-            _mMutex.Close();
-            _mMutex = null;
+            if (mMutex == null) return;
+            mMutex.ReleaseMutex();
+            mMutex.Close();
+            mMutex = null;
         }
 
-        private void App_OnExit(object sender, ExitEventArgs e)
+        private void AppExit(object sender, ExitEventArgs e)
         {
             DisposeMutex();
             PowerManager?.Dispose();

@@ -1,4 +1,4 @@
-﻿using Petrroll.Helpers;
+﻿using PowerSwitcher.Helper;
 using PowerSwitcher.Wrappers;
 using System;
 using System.Collections.Generic;
@@ -27,7 +27,7 @@ namespace PowerSwitcher
         Win32PowSchemasWrapper powerWraper;
         BatteryInfoWrapper batteryWrapper;
 
-        public ObservableCollection<IPowerSchema> Schemas{ get; private set; }
+        public ObservableCollection<IPowerSchema> Schemas { get; private set; }
         public IPowerSchema CurrentSchema { get; private set; }
 
         public PowerPlugStatus CurrentPowerStatus { get; private set; }
@@ -52,18 +52,25 @@ namespace PowerSwitcher
             foreach (var newSchema in newSchemas)
             {
                 var originalSchema = Schemas.FirstOrDefault(sch => sch.Guid == newSchema.Guid);
-                if (originalSchema == null) { insertNewSchema(newSchemas, newSchema); originalSchema = newSchema; }
-               
+                if (originalSchema == null)
+                {
+                    InsertNewSchema(newSchemas, newSchema); originalSchema = newSchema;
+                }
+
                 if (newSchema.Guid == currSchemaGuid && originalSchema?.IsActive != true)
-                { setNewCurrSchema(originalSchema); }
-                
+                {
+                    SetNewCurrSchema(originalSchema);
+                }
+
                 if (originalSchema?.Name != newSchema.Name)
-                { ((PowerSchema)originalSchema).Name = newSchema.Name; }
+                {
+                    ((PowerSchema)originalSchema).Name = newSchema.Name;
+                }
             }
 
-            if(!Schemas.Any(sch => currSchemaGuid == sch.Guid))
+            if (!Schemas.Any(sch => currSchemaGuid == sch.Guid))
             {
-                noSchemaIsActive();
+                NoSchemaIsActive();
             }
 
             //remove old schemas
@@ -71,12 +78,14 @@ namespace PowerSwitcher
             foreach (var oldSchema in Schemas)
             {
                 if (newSchemas.FirstOrDefault(sch => sch.Guid == oldSchema.Guid) == null)
-                { schemasToBeRemoved.Add(oldSchema); }
+                {
+                    schemasToBeRemoved.Add(oldSchema);
+                }
             }
             schemasToBeRemoved.ForEach(sch => Schemas.Remove(sch));
         }
 
-        private void noSchemaIsActive()
+        private void NoSchemaIsActive()
         {
             var oldActive = Schemas.FirstOrDefault(sch => sch.IsActive);
             if (oldActive != null)
@@ -88,13 +97,13 @@ namespace PowerSwitcher
             }
         }
 
-        private void insertNewSchema(List<PowerSchema> newSchemas, PowerSchema newSchema)
+        private void InsertNewSchema(List<PowerSchema> newSchemas, PowerSchema newSchema)
         {
             var insertToIndex = Math.Min(newSchemas.IndexOf(newSchema), Schemas.Count);
             Schemas.Insert(insertToIndex, newSchema);
         }
 
-        private void setNewCurrSchema(IPowerSchema newActiveSchema)
+        private void SetNewCurrSchema(IPowerSchema newActiveSchema)
         {
             var oldActiveSchema = Schemas.FirstOrDefault(sch => sch.IsActive);
 
@@ -119,14 +128,14 @@ namespace PowerSwitcher
 
         private void powerChangedEvent(PowerPlugStatus newStatus)
         {
-            if(newStatus == CurrentPowerStatus) { return; }
+            if (newStatus == CurrentPowerStatus) { return; }
 
             CurrentPowerStatus = newStatus;
             RaisePropertyChangedEvent(nameof(CurrentPowerStatus));
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; 
+        private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {

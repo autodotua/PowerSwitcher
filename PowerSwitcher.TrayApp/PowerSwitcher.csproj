@@ -7,8 +7,8 @@
     <ProjectGuid>{72D5D98C-D8E8-4164-889E-645142A10EDD}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PowerSwitcher.TrayApp</RootNamespace>
-    <AssemblyName>PowerSwitcher.TrayApp</AssemblyName>
+    <RootNamespace>PowerSwitcher</RootNamespace>
+    <AssemblyName>PowerSwitcher</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -65,9 +65,25 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.0\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ExtendedLinguisticServices, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.0\lib\Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Sensors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.0\lib\Microsoft.WindowsAPICodePack.Sensors.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.0\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack.1.1.0\lib\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -96,17 +112,26 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Configuration\PowerSwitcherConfiguration.cs" />
+    <Compile Include="Core\PowerManager.cs" />
+    <Compile Include="Core\PowerSchema.cs" />
+    <Compile Include="Core\Wrappers\BatteryInfoWrapper.cs" />
+    <Compile Include="Core\Wrappers\Exception.cs" />
+    <Compile Include="Core\Wrappers\PowerSchemasWrapper.cs" />
     <Compile Include="Extensions\BlurWindowExtensions.cs" />
     <Compile Include="Extensions\InvertableVisibilityConvertor.cs" />
     <Compile Include="Extensions\OpacityConvertor.cs" />
     <Compile Include="Extensions\WindowExtensions.cs" />
+    <Compile Include="Helper\Configuration.cs" />
+    <Compile Include="Helper\LinqHelpers.cs" />
+    <Compile Include="Helper\ObservableCollectionWhereShim.cs" />
+    <Compile Include="Helper\ObservableObject.cs" />
+    <Compile Include="Helper\Startup.cs" />
     <Compile Include="Resources\AppStrings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>AppStrings.resx</DependentUpon>
     </Compile>
     <Compile Include="Services\GlobalShortcutService.cs" />
-    <Compile Include="ViewModels\MainWindowDesignViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Services\AccentColorService.cs" />
     <Compile Include="Services\TaskbarService.cs" />
@@ -141,6 +166,7 @@
       <LastGenOutput>AppStrings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.manifest" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -149,16 +175,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Petrroll.Helpers\Petrroll.Helpers.csproj">
-      <Project>{c59cb1ed-956d-48f4-a78f-aed6bf3dd8aa}</Project>
-      <Name>Petrroll.Helpers</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PowerSwitcher\PowerSwitcher.csproj">
-      <Project>{1d107d93-2902-4782-9c06-825925c3b39f}</Project>
-      <Name>PowerSwitcher</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Tray.ico" />

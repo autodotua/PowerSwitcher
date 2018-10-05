@@ -7,7 +7,7 @@ using System.Windows.Forms;
 ////
 //  Code copied from https://github.com/File-New-Project/EarTrumpet/blob/master/EarTrumpet/Services/TaskbarService.cs
 ////
-namespace PowerSwitcher.TrayApp.Services
+namespace PowerSwitcher.Services
 {
     public sealed class TaskbarService
     {

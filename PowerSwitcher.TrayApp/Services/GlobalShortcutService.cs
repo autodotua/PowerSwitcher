@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace PowerSwitcher.TrayApp.Services
+namespace PowerSwitcher.Services
 {
     ////
     //  Based on: http://stackoverflow.com/questions/48935/how-can-i-register-a-global-hot-key-to-say-ctrlshiftletter-using-wpf-and-ne

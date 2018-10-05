@@ -1,10 +1,10 @@
-﻿using PowerSwitcher.TrayApp.Services;
+﻿using PowerSwitcher.Services;
 using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
-namespace PowerSwitcher.TrayApp.Extensions
+namespace PowerSwitcher.Extensions
 {
     ////
     //  Code heavily inspired by https://github.com/File-New-Project/EarTrumpet/blob/master/EarTrumpet/Extensions/WindowExtensions.cs

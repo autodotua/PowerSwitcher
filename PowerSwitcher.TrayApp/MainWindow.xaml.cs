@@ -1,5 +1,5 @@
-﻿using PowerSwitcher.TrayApp.Extensions;
-using PowerSwitcher.TrayApp.Services;
+﻿using PowerSwitcher.Extensions;
+using PowerSwitcher.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace PowerSwitcher.TrayApp
+namespace PowerSwitcher
 {
     ////
     //  Code heavily inspired by https://github.com/File-New-Project/EarTrumpet/blob/master/EarTrumpet/MainWindow.xaml.cs
@@ -36,7 +36,10 @@ namespace PowerSwitcher.TrayApp
             Activated += (s, e) =>
             {
                 var container = ElementsList.ItemContainerGenerator.ContainerFromItem(ElementsList.SelectedItem) as FrameworkElement;
-                if (container != null) { container.Focus(); }
+                if (container != null)
+                {
+                    container.Focus();
+                }
             };
             SourceInitialized += (s, e) => UpdateTheme();
         }
@@ -153,7 +156,7 @@ namespace PowerSwitcher.TrayApp
             }
         }
 
-        private void LayoutRoot_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private void LayoutRootPreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollViewer scv = (ScrollViewer)sender;
             scv.ScrollToVerticalOffset(scv.VerticalOffset - e.Delta);

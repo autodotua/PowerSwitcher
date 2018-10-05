@@ -6,7 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 
-namespace Petrroll.Helpers
+namespace PowerSwitcher.Helper
 {
 
     public static class ObservableLINQShim

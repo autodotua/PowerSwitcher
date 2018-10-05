@@ -1,4 +1,4 @@
-﻿using Petrroll.Helpers;
+﻿using PowerSwitcher.Helper;
 using System;
 using System.ComponentModel;
 
@@ -18,12 +18,38 @@ namespace PowerSwitcher
         public Guid Guid { get; }
 
         string name;
-        public string Name{get{return name;} set { if (name == value) { return; } name = value; RaisePropertyChangedEvent(nameof(Name)); } }
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                if (name == value)
+                {
+                    return;
+                }
+                name = value; RaisePropertyChangedEvent(nameof(Name));
+            }
+        }
 
         bool isActive;
-        public bool IsActive {
-            get { return isActive; }
-            set { if (isActive == value) { return; } isActive = value; RaisePropertyChangedEvent(nameof(IsActive)); }
+        public bool IsActive
+        {
+            get
+            {
+                return isActive;
+            }
+            set
+            {
+                if (isActive == value)
+                {
+                    return;
+                }
+                isActive = value;
+                RaisePropertyChangedEvent(nameof(IsActive));
+            }
         }
 
         public PowerSchema(string name, Guid guid) : this(name, guid, false) { }
