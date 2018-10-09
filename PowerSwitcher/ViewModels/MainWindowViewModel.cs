@@ -1,9 +1,11 @@
-﻿using PowerSwitcher.Helper;
-using PowerSwitcher.Configuration;
+﻿using PowerSwitcher.Configuration;
+using PowerSwitcher.Helper;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Windows;
+using SystemPower = Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager;
 
 namespace PowerSwitcher.ViewModels
 {
@@ -15,21 +17,32 @@ namespace PowerSwitcher.ViewModels
         public INotifyCollectionChanged Schemas { get; private set; }
         public IPowerSchema ActiveSchema
         {
-            get { return pwrManager.CurrentSchema; }
-            set { if (value != null && !value.IsActive) { pwrManager.SetPowerSchema(value); } }
+            get=>pwrManager.CurrentSchema;
+            set
+            {
+                if (value != null && !value.IsActive)
+                {
+                    pwrManager.SetPowerSchema(value);
+                }
+            }
         }
         public string BatteryLavel { get; set; }
 
         public MainWindowViewModel()
         {
-            App currApp = System.Windows.Application.Current as App;
-            if (currApp == null) { return; }
+            if (!(App.Current is App app))
+            {
+                return;
+            }
 
-            this.pwrManager = currApp.PowerManager;
-            this.config = currApp.Configuration;
+            pwrManager = app.PowerManager;
+            config = app.Configuration;
 
             pwrManager.PropertyChanged += PwrManager_PropertyChanged;
             config.Data.PropertyChanged += SettingsData_PropertyChanged;
+            SystemPower.BatteryLifePercentChanged += (p1, p2) => UpdateBatteryInfo();
+            SystemPower.PowerSourceChanged += (p1, p2) =>UpdateBatteryInfo();
+
 
             Schemas = pwrManager.Schemas.WhereObservableSwitchable<ObservableCollection<IPowerSchema>, IPowerSchema>
                 (
@@ -75,13 +88,14 @@ namespace PowerSwitcher.ViewModels
 
         private void UpdateBatteryInfo()
         {
-            var status = Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.GetCurrentBatteryState();
-            if (Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.IsBatteryPresent)
+            if (SystemPower.IsBatteryPresent)
             {
-                BatteryLavel = Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.BatteryLifePercent.ToString() + "%";
+                BatteryLavel =SystemPower .BatteryLifePercent.ToString() + "%";
 
                 try
                 {
+                    var status = SystemPower.GetCurrentBatteryState();
+
                     if (status.ChargeRate != 0)
                     {
                         BatteryLavel += "    " + (status.ChargeRate > 0 ? "+" : "")

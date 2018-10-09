@@ -3,9 +3,11 @@ using PowerSwitcher.Helper;
 using PowerSwitcher.Resources;
 using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using appS = Microsoft.WindowsAPICodePack.ApplicationServices;
 using WF = System.Windows.Forms;
 
 namespace PowerSwitcher
@@ -32,7 +34,7 @@ namespace PowerSwitcher
             trayIcon = new WF.NotifyIcon();
             trayIcon.MouseClick += TrayIcon_MouseClick;
 
-            trayIcon.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("pack://application:,,,/PowerSwitcher;component/Tray.ico")).Stream, WF.SystemInformation.SmallIconSize);
+            trayIcon.Icon = new Icon(Application.GetResourceStream(new Uri("pack://application:,,,/PowerSwitcher;component/Tray.ico")).Stream, WF.SystemInformation.SmallIconSize);
             trayIcon.Text = string.Concat(AppStrings.AppName);
 
             trayIcon.Visible = true;
@@ -43,19 +45,86 @@ namespace PowerSwitcher
             powerStatusChanged();
 
 
-            if (Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.IsBatteryPresent)
+            if (appS.PowerManager.IsBatteryPresent)
             {
                 BatteryLifePercentChanged(null, null);
-                Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.BatteryLifePercentChanged += BatteryLifePercentChanged;
+                appS.PowerManager.BatteryLifePercentChanged += BatteryLifePercentChanged;
+                appS.PowerManager.PowerSourceChanged += BatteryLifePercentChanged;
+
             }
         }
 
         private void BatteryLifePercentChanged(object sender, EventArgs e)
         {
-            if (Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.IsBatteryPresent)
+            if(!appS.PowerManager.IsBatteryPresent)
             {
-                trayIcon.Text = Microsoft.WindowsAPICodePack.ApplicationServices.PowerManager.BatteryLifePercent + "%";
+                appS.PowerManager.BatteryLifePercentChanged -= BatteryLifePercentChanged;
+                appS.PowerManager.PowerSourceChanged -= BatteryLifePercentChanged;
+                return;
             }
+            var percent = appS.PowerManager.BatteryLifePercent;
+            bool power = appS.PowerManager.GetCurrentBatteryState().ACOnline;
+            if (appS.PowerManager.IsBatteryPresent)
+            {
+                trayIcon.Text = percent + "%";
+            }
+            trayIcon.Icon = GetIcon(percent.ToString(), power);
+        }
+        public static Icon GetIcon(string text, bool powerOnline)
+        {
+
+            //Create bitmap, kind of canvas
+            Bitmap bitmap = new Bitmap(128, 128);
+            //  bitmap.MakeTransparent(Color.White);
+            //  IntPtr icH = bitmap.GetHicon();
+            //  Icon icon = Icon.FromHandle(icH);
+            Font drawFont;
+            if (!powerOnline)
+            {
+                drawFont = new Font(new FontFamily("微软雅黑"), 56, System.Drawing.FontStyle.Regular);
+            }
+           else
+            {
+                if(text=="100")
+                {
+                    drawFont = new Font(new FontFamily("微软雅黑"), 52, System.Drawing.FontStyle.Bold);
+                }
+                else
+                {
+                    drawFont = new Font(new FontFamily("微软雅黑"), 56, System.Drawing.FontStyle.Bold);
+
+                }
+            }
+            SolidBrush drawBrush = new SolidBrush(Color.White);
+
+            Graphics graphics = Graphics.FromImage(bitmap);
+
+            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+            // graphics.DrawIcon(icon, 0, 0);
+            if (text != "100")
+            {
+                graphics.DrawString(text, drawFont, drawBrush, 0, 0);
+            }
+            else
+            {
+                graphics.DrawString("FU", drawFont, drawBrush, 0, 0);
+            }
+            //if (powerOnline)
+            //{
+            //    graphics.DrawLine(new Pen(drawBrush, 12), new PointF(0, 128), new PointF(128, 128));
+            //}
+
+            //To Save icon to disk
+            // bitmap.Save("icon.ico", System.Drawing.Imaging.ImageFormat.Icon);
+
+            Icon createdIcon = Icon.FromHandle(bitmap.GetHicon());
+
+            drawFont.Dispose();
+            drawBrush.Dispose();
+            graphics.Dispose();
+            bitmap.Dispose();
+
+            return createdIcon;
         }
 
         public void CreateAltMenu()
